@@ -340,6 +340,7 @@ while node != goal:
 spin.append((50,50))
 print(len(spin))
 print(len(path))
+print(spin)
 i = 0
 tn = 45
 for node in path:
