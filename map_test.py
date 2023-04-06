@@ -39,9 +39,7 @@ def moveset(Xi,Yi,Thetai,RPM):
     Thetan = 180 * (Thetan) / 3.14
     return Xn, Yn, Thetan, D, UL, UR
 
-
-
-def plot_curve(Xi,Yi,Thetai,UL,UR):
+def plot_curve(Xi,Yi,Thetai,UL,UR,X,Y):
     t = 0
     r = 0.038
     L = 0.354
@@ -59,31 +57,16 @@ def plot_curve(Xi,Yi,Thetai,UL,UR):
         Ys = Yn
         Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
         Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
-        Thetan += (r / L) * (UR - UL) * dt
-        plt.plot([Xs, Xn], [Ys, Yn], color="green")
-    Thetan = 180 * (Thetan) / 3.14
-    return Xn, Yn, Thetan, D
 
-def plot_curve(Xi,Yi,Thetai,UL,UR):
-    t = 0
-    r = 0.038
-    L = 0.354
-    dt = 0.1
-    Xn=Xi
-    Yn=Yi
-    Thetan = 3.14 * Thetai / 180
-# Xi, Yi,Thetai: Input point's coordinates
-# Xs, Ys: Start point coordinates for plot function
-# Xn, Yn, Thetan: End point coordintes
-    D=0
-    while t<1:
-        t = t + dt
-        Xs = Xn
-        Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
         Thetan += (r / L) * (UR - UL) * dt
+        v = np.sqrt((Xs-Xn)**2+(Ys-Yn)**2)
+        rz = (r/L)*(UR - UL)
+        print(Xn, Yn)
+        print(v/100)
+        print(rz/10)
         plt.plot([Xs, Xn], [Ys, Yn], color="green")
+        if Xn == X and Yn == Y:
+            break
     Thetan = 180 * (Thetan) / 3.14
     return Xn, Yn, Thetan, D
 
@@ -379,7 +362,10 @@ while node != goal:
         if node == goal:
             break
         spin.append(rpm[node])
-spin.append((50,50))
+spin.append((0,0))
+spin.append((0,0))
+# spin.append((0,0))
+# spin.remove((10,10))
 
 thetas[(Xs[0],Xs[1])] = 0.0
 node = []
@@ -389,7 +375,8 @@ while node != goal:
             break
         theta.append(thetas[node])
 theta.append(0.0)
-# theta.append(0.0)
+
+theta.append(0.0)
 # theta.remove(0.0)
 
 # print(len(spin))
@@ -404,7 +391,7 @@ for i in range(0, len(path)-1):
     xn = path[i+1][0]
     yn = path[i+1][1]
     v = np.sqrt((xn-xi)**2+(yn-yi)**2)
-    print(v)
+    #print(v)
 
 for item in spin:
     r = 0.038
@@ -424,74 +411,11 @@ with open("coords.json","w") as outfile:
 #     xd += 0.5*r * (item[0]+item[1]) * math.cos(Thetan)
 i = 0
 tn = 45
-for i in range(0,len(path)):
-    plot_curve(path[i][0],path[i][1],theta[i],spin[i][0],spin[i][1])
+for i in range(0,len(path)-1):
+    plot_curve(path[i][0],path[i][1],theta[i],spin[i+1][0],spin[i+1][1],path[i+1][0],path[i+1][1])
 
 for node in path:
     map_empty[int(round(node[0])),int(round(node[1])),1] = 255
-
-# for node in path:
-#     X1 = plot_curve(node[0],node[1],tn, spin[i][0],spin[i][1])  # (0,0,45) hypothetical start configuration
-#     for node in path:
-#         X2=plot_curve(X1[0],X1[1],X1[2], spin[i][0],spin[i][1])
-#     i = i + 1
-#     tn = X1[2]
-# print(path)
-# print(" ")
-# print(rpm)
-#actions=[[50,50], [55,55],[50,45],[45,50],[50,55],[55,50],[55,45],[45,55]]
-# for i in range(0,len(path)-1):
-#     xi = path[i][0]
-#     yi = path[i][1]
-#     xn = path[i+1][0]
-#     yn = path[i+1][1]
-#     if xn - xi < 1.7 and xn - xi > 1.55 and yn - yi < 1.7 and yn - yi > 1.55:
-#        # X1= plot_curve(xi,yi,45, actions[0][0],actions[0][1])
-#         UL = actions[0][0]
-#         UR = actions[0][1]
-#     if xn - xi < 1.55 and xn - xi > 1.4 and yn - yi < 1.55 and yn - yi > 1.4:
-#        # X1= plot_curve(xi,yi,45, actions[1][0],actions[1][1])
-#         UL = actions[1][0]
-#         UR = actions[1][1]
-#     if xn - xi < 1.75 and xn - xi > 1.65 and yn - yi < 1.1 and yn - yi > 0.8:
-#        # X1= plot_curve(xi,yi,45, actions[2][0],actions[2][1])
-#         UL = actions[2][0]
-#         UR = actions[2][1]
-#     if xn - xi < 1.1 and xn - xi > 0.8 and yn - yi < 1.75 and yn - yi > 1.65:
-#        # X1= plot_curve(xi,yi,45, actions[3][0],actions[3][1])
-#         UL = actions[3][0]
-#         UR = actions[3][1]
-#     if xn - xi < 1.2 and xn - xi > 0.9 and yn - yi < 1.95 and yn - yi > 1.75:
-#        # X1= plot_curve(xi,yi,45, actions[4][0],actions[4][1]) 
-#         UL = actions[4][0]
-#         UR = actions[4][1] 
-#     if xn - xi < 1.95 and xn - xi > 1.75 and yn - yi < 1.2 and yn - yi > 0.9:
-#        # X1= plot_curve(xi,yi,45, actions[5][0],actions[5][1]) 
-#         UL = actions[5][0]
-#         UR = actions[5][1]
-#     if xn - xi < 2.1 and xn - xi > 1.85 and yn - yi < 0.6 and yn - yi > 0.3:
-#        # X1= plot_curve(xi,yi,45, actions[6][0],actions[6][1]) 
-#         UL = actions[6][0]
-#         UR = actions[6][1]
-#     if xn - xi < 0.6 and xn - xi > 0.3 and yn - yi < 2.1 and yn - yi > 1.85:
-#         #X1= plot_curve(xi,yi,45, actions[7][0],actions[7][1]) 
-#         UL = actions[7][0]
-#         UR = actions[7][1]
-#     X1= plot_curve(xi,yi,45,UL,UR)
-#     for point in path:
-#         X2=plot_curve(X1[0],X1[1],X1[2], UL,UR)
-
-
-# for point in path:
-#     X1= plot_curve(point[0],point[1],45, actions[0][0],actions[0][1]) # (0,0,45) hypothetical start configuration
-#     for point in path:
-#         X2=plot_curve(X1[0],X1[1],X1[2], actions[0][0],actions[0][1])
-
-# for action in actions:
-#     X1= plot_curve(0,0,45, action[0],action[1]) # (0,0,45) hypothetical start configuration
-#     for action in actions:
-#         X2=plot_curve(X1[0],X1[1],X1[2], action[0],action[1])
-
 
 #plt.grid()
 # tr = transforms.Affine2D().rotate_deg(90)
