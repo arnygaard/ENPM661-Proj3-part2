@@ -6,6 +6,7 @@ import sys
 from queue import PriorityQueue
 import cv2 as cv
 from matplotlib import transforms
+import json
 
 fig, ax = plt.subplots()
 
@@ -28,8 +29,8 @@ def moveset(Xi,Yi,Thetai,RPM):
         t = t + dt
         Xs = Xn
         Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
+        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
+        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
         Thetan += (r / L) * (UR - UL) * dt
         #plt.plot([Xs, Xn], [Ys, Yn], color="green")
         #plt.plot([Xs, Xn], [Ys, Yn], color="blue")
@@ -56,10 +57,33 @@ def plot_curve(Xi,Yi,Thetai,UL,UR):
         t = t + dt
         Xs = Xn
         Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
+        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
+        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
         Thetan += (r / L) * (UR - UL) * dt
-        plt.plot([Xs, Xn], [Ys, Yn], color="red")
+        plt.plot([Xs, Xn], [Ys, Yn], color="green")
+    Thetan = 180 * (Thetan) / 3.14
+    return Xn, Yn, Thetan, D
+
+def plot_curve(Xi,Yi,Thetai,UL,UR):
+    t = 0
+    r = 0.038
+    L = 0.354
+    dt = 0.1
+    Xn=Xi
+    Yn=Yi
+    Thetan = 3.14 * Thetai / 180
+# Xi, Yi,Thetai: Input point's coordinates
+# Xs, Ys: Start point coordinates for plot function
+# Xn, Yn, Thetan: End point coordintes
+    D=0
+    while t<1:
+        t = t + dt
+        Xs = Xn
+        Ys = Yn
+        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
+        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
+        Thetan += (r / L) * (UR - UL) * dt
+        plt.plot([Xs, Xn], [Ys, Yn], color="green")
     Thetan = 180 * (Thetan) / 3.14
     return Xn, Yn, Thetan, D
 
@@ -91,7 +115,7 @@ map_copy = map_empty.copy()
 #buffer input
 # print('Enter buffer size:')
 # buffer = int(input())
-buffer = 10
+buffer = 20
 
 #Creating all obstacles on map
 #creating square shape dimensions and assigning pixel values to map
@@ -142,13 +166,13 @@ for i in range(x_hc - hc_r - buffer, x_hc + hc_r + buffer):
 
 for i in range(0,600):
     for j in range(0,200):
-        if i < 6:
+        if i < 6 + 10:
             map_empty[i,j,:] = [239,76,76]
-        if i > 594:
+        if i > 594 - 10:
             map_empty[i,j,:] = [239,76,76]
-        if j < 6:
+        if j < 6 + 10:
             map_empty[i,j,:] = [239,76,76]
-        if j > 193:
+        if j > 193 - 10:
             map_empty[i,j,:] = [239,76,76]
 
 
@@ -172,13 +196,16 @@ for i in range(0,600):
 # print('Step Size:',l)
 # #assign values and dimensions
 Xs = [50, 100, 0, 110,  0, 0]
-goal = [100,50]
+goal = [580,180]
 #goal = [200, 120]
 #goal_angle = ga
 dim = (600,200)
 #l = 5
 #actions=[[50,50], [55,55],[50,45],[45,50],[50,55],[55,50],[55,45],[45,55]]
-actions=[[100,100], [110,110],[100,80],[80,100],[100,110],[110,100],[110,80],[80,110]]
+actions=[[5,5], [10,10],[5,0],[0,5],[5,10],[10,5]]
+#actions=[[100,100], [110,110],[100,80],[80,100],[100,110],[110,100],[110,80],[80,110]]
+#actions=[[200,200], [110,110],[200,80],[80,200],[110,200],[200,110],[110,80],[80,110]]
+#actions = [[50,50], [50,0], [0,50], [50,100], [100,50], [100,100], [0,100], [100,0]]
 #actions=[[50,50], [100,100],[50,0],[0,50],[50,100],[100,50],[100,0],[0,100]]
 v_thresh = 1
 #creating visit matrix
@@ -219,26 +246,37 @@ open_list = []
 ClosedList = []
 closed_list = []
 cost_map[Xs[0],Xs[1]] = 0
-goal_thresh = 3
-d = 1
+goal_thresh = 10
+d = 2
 parents = {}
 rpm = {}
-c = 1
+thetas = {}
+c = 0
 testing_node = []
 #start timer
 start_time = time.time()
-
+dupe = 5
 #begin A* algorithm
+print("Beginning search")
 OpenList.put((0,Xs))
 while OpenList and goal_state != 0:
 
     #start exploring node
     Node_State_i = OpenList.get()[1]
+    # print(np.sqrt(Node_State_i[0]**2+Node_State_i[1]**2))
+    # print(Node_State_i[3])
+    # time.sleep(1)
     # print(Node_State_i[4],Node_State_i[5])
     # time.sleep(10)
     #info = cost(Node_State_i[0], Node_State_i[1], Node_State_i[2], )
     #make sure node is marked as visited
     V[[int(round(Node_State_i[0]/v_thresh))],[int(round(Node_State_i[1]/v_thresh))]] = 1
+
+    # for i in range(-dupe,dupe):
+    #     for j in range(-dupe,dupe):
+    #         if V[[int(round(Node_State_i[0]/v_thresh))+i],[int(round(Node_State_i[1]/v_thresh))+j]] == 0:
+    #                 V[[int(round(Node_State_i[0]/v_thresh))],[int(round(Node_State_i[1]/v_thresh))]] = 1
+
 
     #if node is within goal threshold, end loop
     if Node_State_i[0] > goal[0]-goal_thresh and Node_State_i[1] > goal[1]-goal_thresh and Node_State_i[0] < goal[0]+goal_thresh and Node_State_i[1] < goal[1]+goal_thresh:
@@ -256,8 +294,9 @@ while OpenList and goal_state != 0:
         #print(k[0],k[1])
         i = int(round(k[0]))
         j = int(round(k[1]))
-        if map_empty[i,j,0] == 0:
-            testing_node.append(k) # (0,0,45) hypothetical start configuration, this dosn't matter for calucating the edges'costs
+        if j < 200 and j > 0 and i < 600 and i > 0:
+            if map_empty[i,j,0] == 0:
+                testing_node.append(k) # (0,0,45) hypothetical start configuration, this dosn't matter for calucating the edges'costs
 
     #loop through each possible move
     for item in testing_node:
@@ -283,6 +322,8 @@ while OpenList and goal_state != 0:
                 parents[Node_State_i[0],Node_State_i[1]].append([item[0],item[1]])
                 
                 rpm[item[0],item[1]] = (item[4],item[5])
+                thetas[item[0],item[1]] = item[2]
+
                 # rpm.setdefault((Node_State_i[4],Node_State_i[5]), [])
                 # rpm[Node_State_i[4],Node_State_i[5]].append([item[4],item[5]])
                 OpenList.put((cost,item))
@@ -299,9 +340,11 @@ while OpenList and goal_state != 0:
                 parents[Node_State_i[0],Node_State_i[1]].append([item[0],item[1]])
 
                 rpm[item[0],item[1]] = (item[4],item[5])
+                thetas[item[0],item[1]] = item[2]
                 # rpm.setdefault((Node_State_i[4],Node_State_i[5]), [])
                 # rpm[Node_State_i[4],Node_State_i[5]].append([item[4],item[5]])
     testing_node = []
+    c = 0
 
 #end timer and print
 print("A* search took %s seconds" % (time.time() - start_time))
@@ -317,6 +360,7 @@ val_list=list(parents.values())
 print("Generating Path...")
 path = []
 spin = []
+theta = []
 path.append(goal)
 node = goal
 start = [Xs[0], Xs[1]]
@@ -327,22 +371,62 @@ while node != start:
             path.append(key_list[ind])
             node = [key_list[ind][0], key_list[ind][1]]
 path.reverse()
-rpm[(Xs[0],Xs[1])] = (0,0)
+
+rpm[(Xs[0],Xs[1])] = (10,10)
 node = []
 while node != goal:
     for node in path:
         if node == goal:
             break
-        # print(rpm[node])
-        # print(node)
-        # time.sleep(0.1)
         spin.append(rpm[node])
 spin.append((50,50))
-print(len(spin))
-print(len(path))
-print(spin)
+
+thetas[(Xs[0],Xs[1])] = 0.0
+node = []
+while node != goal:
+    for node in path:
+        if node == goal:
+            break
+        theta.append(thetas[node])
+theta.append(0.0)
+# theta.append(0.0)
+# theta.remove(0.0)
+
+# print(len(spin))
+# print(len(path))
+# print(len(theta))
+# print(theta)
+#print(spin)
+
+for i in range(0, len(path)-1):
+    xi = path[i][0]
+    yi = path[i][1]
+    xn = path[i+1][0]
+    yn = path[i+1][1]
+    v = np.sqrt((xn-xi)**2+(yn-yi)**2)
+    print(v)
+
+for item in spin:
+    r = 0.038
+    L = 0.354
+    rz = (r/L)*(item[1]-item[0])
+    #print(rz)
+
+#json_string = json.dumps(spin)
+with open("rpm.json", "w") as outfile:
+    json.dump(spin, outfile)
+with open("coords.json","w") as outfile:
+    json.dump(path, outfile)
+# for item in spin:
+#     r = 0.038
+#     L = 0.354
+#     xd = (r/2)*(item[0]+item[1])* 
+#     xd += 0.5*r * (item[0]+item[1]) * math.cos(Thetan)
 i = 0
 tn = 45
+for i in range(0,len(path)):
+    plot_curve(path[i][0],path[i][1],theta[i],spin[i][0],spin[i][1])
+
 for node in path:
     map_empty[int(round(node[0])),int(round(node[1])),1] = 255
 
