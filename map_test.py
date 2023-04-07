@@ -60,10 +60,11 @@ def plot_curve(Xi,Yi,Thetai,UL,UR,X,Y):
 
         Thetan += (r / L) * (UR - UL) * dt
         v = np.sqrt((Xs-Xn)**2+(Ys-Yn)**2)
-        rz = (r/L)*(UR - UL)
+        rz = (r/L)*(UR - UL)*(np.pi/180)
         print(Xn, Yn)
         print(v/100)
-        print(rz/10)
+        print(rz)
+        time.sleep(0.1)
         plt.plot([Xs, Xn], [Ys, Yn], color="green")
         if Xn == X and Yn == Y:
             break
