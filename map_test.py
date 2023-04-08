@@ -9,7 +9,6 @@ from matplotlib import transforms
 import json
 
 fig, ax = plt.subplots()
-weight = 200
 
 def moveset(Xi,Yi,Thetai,RPM):
     UL = RPM[0]
@@ -30,8 +29,8 @@ def moveset(Xi,Yi,Thetai,RPM):
         t = t + dt
         Xs = Xn
         Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * weight
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * weight
+        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
+        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
         Thetan += (r / L) * (UR - UL) * dt
         #plt.plot([Xs, Xn], [Ys, Yn], color="green")
         #plt.plot([Xs, Xn], [Ys, Yn], color="blue")
@@ -52,60 +51,26 @@ def plot_curve(Xi,Yi,Thetai,UL,UR,X,Y):
 # Xs, Ys: Start point coordinates for plot function
 # Xn, Yn, Thetan: End point coordintes
     D=0
-    while t<1 and Xn != X or Yn != Y:
+    while t<1:
         t = t + dt
         Xs = Xn
         Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * weight
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * weight
-        Xd = 0.5*r * (UL + UR) * math.cos(Thetan) * weight
-        Yd = 0.5*r * (UL + UR) * math.sin(Thetan) * weight
+        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 100
+        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 100
 
         Thetan += (r / L) * (UR - UL) * dt
-        v = np.sqrt((Xn-Xs)**2+(Yn-Ys)**2)
-        s = np.sqrt((Xd)**2+(Yd)**2)
+        v = np.sqrt((Xs-Xn)**2+(Ys-Yn)**2)
         rz = (r/L)*(UR - UL)
         print(Xn, Yn)
-        print("s:",s/345)
-        #print("v:",v/20)
-        print("rz:",rz)
-        # time.sleep(0.1)
+        print(v/100)
+        print(rz/10)
         plt.plot([Xs, Xn], [Ys, Yn], color="green")
-        # if Xn == X and Yn == Y:
-        #     break
+        if Xn == X and Yn == Y:
+            break
     Thetan = 180 * (Thetan) / 3.14
     return Xn, Yn, Thetan, D
 
-def velo(Xi,Yi,Thetai,UL,UR,X,Y):
-    t = 0
-    r = 0.038
-    L = 0.354
-    dt = 0.1
-    Xn=Xi
-    Yn=Yi
-    Thetan = 3.14 * Thetai / 180
-# Xi, Yi,Thetai: Input point's coordinates
-# Xs, Ys: Start point coordinates for plot function
-# Xn, Yn, Thetan: End point coordintes
-    D=0
-    while t<1 and Xn != X or Yn != Y:
-        t = t + dt
-        Xs = Xn
-        Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt * 200
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt * 200
 
-        Thetan += (r / L) * (UR - UL) * dt
-        v = np.sqrt((Xn-Xs)**2+(Yn-Ys)**2)
-        rz = (r/L)*(UR - UL)
-        print(Xn, Yn)
-        print(v/20)
-        print(rz/2)
-        # time.sleep(0.1)
-        # if Xn == X and Yn == Y:
-        #     break
-    Thetan = 180 * (Thetan) / 3.14
-    return Xn, Yn, Thetan, D
 
 
 #calculate cost to come for each node
@@ -137,7 +102,7 @@ buffer = 20
 
 #Creating all obstacles on map
 #creating square shape dimensions and assigning pixel values to map
-x_square_start = 120 #150
+x_square_start = 150
 x_square_end = 165
 y_square_start = 75
 y_square_end = 199
@@ -153,7 +118,7 @@ for i in range(x_square_start-buffer, x_square_end+buffer):
 
 
 #second square
-x_square_start = 225 #250
+x_square_start = 250
 x_square_end = 265
 y_square_start = 0
 y_square_end = 125
@@ -184,7 +149,7 @@ for i in range(x_hc - hc_r - buffer, x_hc + hc_r + buffer):
 
 for i in range(0,600):
     for j in range(0,200):
-        if i < 25:
+        if i < 6 + 10:
             map_empty[i,j,:] = [239,76,76]
         if i > 594 - 10:
             map_empty[i,j,:] = [239,76,76]
@@ -439,8 +404,6 @@ with open("rpm.json", "w") as outfile:
     json.dump(spin, outfile)
 with open("coords.json","w") as outfile:
     json.dump(path, outfile)
-with open("theta.json","w") as outfile:
-    json.dump(theta, outfile)
 # for item in spin:
 #     r = 0.038
 #     L = 0.354
