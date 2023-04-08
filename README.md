@@ -1,8 +1,8 @@
-git repo: https://github.com/arnygaard/ENPM661-Proj3-part2.git
-
 Adam Nygaard, anygaard, 119457894
 
 Bob Reiter, reiter22, 119457924
+
+
 
 Part 01:
 
@@ -25,6 +25,7 @@ In order to run the algorithm correctly, first make sure to run the code in a co
 When running the code, you will be asked to input start and goal points. Make sure to enter each number seperately, as stated by the instructions in the terminal. Only enter one coordinate at a time, as the code will not accept xy coordinate pairs for start and goal nodes.
 
 If you input coordinates inside an obstacle, the program will output a failure message and will need to be rerun.
+
 
 
 Part 02:
