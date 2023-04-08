@@ -13,7 +13,7 @@ matplotlib, numpy as np, cv2 as cv, matplotlib.pyplot as plt, math, time, sys, q
 recommended starting values:
 start x: 50
 start y: 100
-start ange: 0
+start angle: 0
 goal x: 580
 goal y: 190
 rpm 1: 5
